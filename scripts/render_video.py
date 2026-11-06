@@ -118,7 +118,7 @@ def concat(parts, destination):
 
 async def main():
     data = json.loads((ROOT / 'news.json').read_text(encoding='utf-8'))
-    items = data['items']
+    items = data if isinstance(data, list) else data.get('items', [])
     if not items:
         print('No approved news; skipping video generation')
         return
