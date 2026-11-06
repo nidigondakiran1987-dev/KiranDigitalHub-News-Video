@@ -1,0 +1,28 @@
+
+name: KiranDigitalHub News Video
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  setup-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Check FFmpeg installation
+        run: |
+          echo "KiranDigitalHub Video Setup"
+          ffmpeg -version | head -n 1
+
+      - name: Check video formats
+        run: |
+          echo "Shorts: 1080x1920 (9:16)"
+          echo "Long: 1920x1080 (16:9)"
+          echo "Google Sheets connection: Not configured yet"
+          echo "Video rendering: Not configured yet"
