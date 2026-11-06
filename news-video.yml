@@ -1,0 +1,57 @@
+name: KiranDigitalHub News Video
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  render:
+    runs-on: ubuntu-latest
+    timeout-minutes: 55
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Python setup
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install FFmpeg, Telugu font and Python packages
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg fonts-noto-core fonts-dejavu-core
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          fc-match 'Noto Sans Telugu'
+
+      - name: Authenticate to Google Cloud using OIDC
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
+          create_credentials_file: true
+          export_environment_variables: true
+
+      - name: Fetch today's approved news
+        env:
+          GOOGLE_SHEET_ID: ${{ secrets.GOOGLE_SHEET_ID }}
+        run: python scripts/prepare_news.py
+
+      - name: Generate Telugu and English narrated videos
+        env:
+          MAX_NEWS: '5'
+        run: python scripts/render_video.py
+
+      - name: Upload news JSON and MP4 videos for manual review
+        uses: actions/upload-artifact@v4
+        with:
+          name: KiranDigitalHub-News-Review
+          path: |
+            output/news.json
+            output/*.mp4
+          if-no-files-found: error
+          retention-days: 7
