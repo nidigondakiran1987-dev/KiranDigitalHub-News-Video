@@ -9,35 +9,23 @@ permissions:
   id-token: write
 
 jobs:
-  setup-test:
+  video:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout repository
+      - name: Checkout
         uses: actions/checkout@v4
 
       - name: Authenticate to Google Cloud
-        id: auth
         uses: google-github-actions/auth@v2
         with:
-          workload_identity_provider: projects/529519213557/locations/global/workloadIdentityPools/kirandigitalhub-github/providers/kirandigitalhub-github-actions
-          service_account: kirandigitalhub-news-reader@kirandigitalhub-news-video.iam.gserviceaccount.com
+          workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
 
-      - name: Verify Google authentication
-        run: |
-          echo "Google authentication step completed"
-          test -f "$GOOGLE_APPLICATION_CREDENTIALS"
-          echo "Credential configuration file exists"
+      - name: Install Google Cloud CLI
+        uses: google-github-actions/setup-gcloud@v2
 
-      - name: Check FFmpeg installation
-        run: |
-          echo "KiranDigitalHub Video Setup"
-          ffmpeg -version | head -n 1
+      - name: Verify Google Cloud
+        run: gcloud auth list
 
-      - name: Check video formats
-        run: |
-          echo "Shorts: 1080x1920 (9:16)"
-          echo "Long: 1920x1080 (16:9)"
-          echo "Google Sheets connection: Not tested yet"
-          echo "Video rendering: Not configured yet"
-
+      - name: Check FFmpeg
+        run: ffmpeg -version | head -n 1
