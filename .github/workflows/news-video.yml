@@ -6,6 +6,7 @@ on:
 
 permissions:
   contents: read
+  id-token: write
 
 jobs:
   setup-test:
@@ -14,6 +15,19 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+
+      - name: Authenticate to Google Cloud
+        id: auth
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: projects/529519213557/locations/global/workloadIdentityPools/kirandigitalhub-github/providers/kirandigitalhub-github-actions
+          service_account: kirandigitalhub-news-reader@kirandigitalhub-news-video.iam.gserviceaccount.com
+
+      - name: Verify Google authentication
+        run: |
+          echo "Google authentication step completed"
+          test -f "$GOOGLE_APPLICATION_CREDENTIALS"
+          echo "Credential configuration file exists"
 
       - name: Check FFmpeg installation
         run: |
@@ -24,5 +38,6 @@ jobs:
         run: |
           echo "Shorts: 1080x1920 (9:16)"
           echo "Long: 1920x1080 (16:9)"
-          echo "Google Sheets connection: Not configured yet"
+          echo "Google Sheets connection: Not tested yet"
           echo "Video rendering: Not configured yet"
+
